@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+<head>	
+<style>
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: verdana;
+  background-color: #ADD8E6;
+  font-size: 15px;
+ /* Style the header */
+}
+
+header h1 {
+  background-color: #0000A0;
+  padding: 10px;
+  text-align: center;
+  font-size: 35px;
+  color: black;
+  font-family: verdana;
+}
+</style>
+<script src="https://www.gstatic.com/firebasejs/5.9.3/firebase.js">
+</script>
+<script type="text/javascript">
+  // Initialize Firebase
+  var config = {
+    apiKey: "AIzaSyDFjqF-fR1Lb95iHp8XeZRzwCCCoWTpDQ4",
+    authDomain: "inf-552.firebaseapp.com",
+    databaseURL: "https://inf-552.firebaseio.com",
+    projectId: "inf-552",
+    storageBucket: "inf-552.appspot.com",
+    messagingSenderId: "381457764919"
+  };
+  firebase.initializeApp(config);
+   // Get a reference to the database service
+  var database = firebase.database();
+</script>
+<!-- Firebase App is always required and must be first -->
+<script src="https://www.gstatic.com/firebasejs/5.9.2/firebase-app.js"></script>
+
+<!-- Add additional services that you want to use -->
+<script src="https://www.gstatic.com/firebasejs/5.9.2/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/5.9.2/firebase-database.js"></script>
+<script src="https://www.gstatic.com/firebasejs/5.9.2/firebase-firestore.js"></script>
+<script src="https://www.gstatic.com/firebasejs/5.9.2/firebase-messaging.js"></script>
+<script src="https://www.gstatic.com/firebasejs/5.9.2/firebase-functions.js"></script>
+<script type="text/javascript"> 
+// Write Operation
+	function writeUserData($switchh) {
+		let date= new Date();
+		var month = String(date.getMonth() + 1);
+		var day = date.getDate()
+		var year = date.getFullYear().toString();
+		var fin_date = month.concat("-" ,day , "-",year);
+
+		database.ref('/project/Ring').update({
+		"Do_Not_Disturb" : $switchh});
+
+		// Write to Log
+		let tst = "/project/Ring/Chimes_Log/Dates";
+		var date_log = tst +"/"+fin_date;
+
+		database.ref(tst).once('value').then(function(snapshot) {
+			var check = snapshot.child(fin_date).exists();
+			if (check){
+				database.ref(date_log).once('value', function(snapshot) {
+    					var count = snapshot.val();
+    					var updated = count + 1;
+    					database.ref(tst).update({ [fin_date] : updated });
+    			});
+			}
+			else {
+				database.ref(tst).update({
+					[fin_date]: 1
+				});
+			};
+		});
+	}; 
+
+</script>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">	
+	<title>Ring Doorbell Control Panel </title>
+	<img align="left" alt = "logo" src="ring.jpg" height=300px width=300px style="padding-top: 20px; padding-right: 20px; padding-bottom: 20px; padding-left: 20px;">
+	</head>
+	<body>
+		<h1 align="center"> Ring Door-bell </h1>
+		<form  method="get"> 
+			<fieldset>
+				<legend> <b> Do Not Disturb</b> </legend>
+				<b>Current Status: </b> 
+				<p id="demo">
+
+				<script type="text/javascript">
+					// Get Current Status
+					var current = database.ref().child('/project/Ring/Do_Not_Disturb').on('value', function(snapshot) {
+    					console.log(snapshot.val());
+    					document.getElementById("demo").innerHTML = snapshot.val();
+    				});
+					
+				</script> 
+				<br>
+				<br>
+			</fieldset>
+			</p>
+		</form>
+		<form action='' method="put">
+			<fieldset>
+				<legend><b>Control Device </b></legend>
+				<b>Do Not Disturb (Chimes): </b>
+				<select id = "change_status" name="change_status" onchange="writeUserData(value);">
+					<option value=""> </option>
+					<option name = "on" value="On"> On </option>
+					<option name = "off" value="Off">  Off </option>
+					</select>
+ 
+			</fieldset>
+		</form>
+
+		<form >
+			<fieldset align="center">
+				<legend><b>Number of Guests (Past 30 Days)</b></legend>
+				<img align="middle" src="ring_ts.jpg" height="500" width="800"> 
+			</fieldset>
+		</form>
+		<a href="file:///Users/rubinakabir/Documents/551/Project/main.html">Return to Device List</a>
+
+</body>
+</html>
